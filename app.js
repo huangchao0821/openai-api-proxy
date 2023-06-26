@@ -30,7 +30,6 @@ const mdClient = process.env.TENCENT_CLOUD_SID && process.env.TENCENT_CLOUD_SKEY
 const controller = new AbortController();
 
 app.all(`*`, async (req, res) => {
-  
   if(req.originalUrl) req.url = req.originalUrl;
   let url = `https://api.openai.com${req.url}`;
   // 从 header 中取得 Authorization': 'Bearer 后的 token
@@ -46,7 +45,16 @@ app.all(`*`, async (req, res) => {
     return res.status(403).send('Forbidden');
 
   // console.log( req );
-  const { moderation, moderation_level, ...restBody } = req.body;
+  const { moderation, moderation_level, prompt,...restBody } = req.body;
+  restBody.prompt = `
+  当前日期：2023年6月26日
+  当前星期：星期一
+  当前时间：13:46
+
+  （以上是一些前提条件，如果以下是和时间相关的问题，请参考上述条件）
+
+Human: ${prompt}
+Ai：`;
   let sentence = "";
   // 建立一个句子缓冲区
   let sentence_buffer = [];
@@ -180,7 +188,6 @@ app.all(`*`, async (req, res) => {
   // console.log({url, options});
 
   try {
-    
     // 如果是 chat completion 和 text completion，使用 SSE
     if( (req.url.startsWith('/v1/completions') || req.url.startsWith('/v1/chat/completions')) && req.body.stream ) {
       console.log("使用 SSE");
