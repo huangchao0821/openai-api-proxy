@@ -46,9 +46,9 @@ app.all(`*`, async (req, res) => {
 
   // console.log( req );
   const { moderation, moderation_level, ...restBody } = req.body;
-  
   restBody.messages.unshift({ role: 'system', content: `现在${getDayOfWeek()}` })
   restBody.messages.unshift({ role: 'system', content: `现在的时间:${getCurrentTime()}` })
+  console.log('==>',restBody);
   
   let sentence = "";
   // 建立一个句子缓冲区
