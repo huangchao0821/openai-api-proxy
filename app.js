@@ -45,16 +45,11 @@ app.all(`*`, async (req, res) => {
     return res.status(403).send('Forbidden');
 
   // console.log( req );
-  const { moderation, moderation_level, prompt,...restBody } = req.body;
-  restBody.prompt = `
-  当前日期：2023年6月26日
-  当前星期：星期一
-  当前时间：13:46
-
-  （以上是一些前提条件，如果以下是和时间相关的问题，请参考上述条件）
-
-Human: ${prompt}
-Ai：`;
+  const { moderation, moderation_level, ...restBody } = req.body;
+  
+  restBody.messages.unshift({ role: 'system', content: `现在${getDayOfWeek()}` })
+  restBody.messages.unshift({ role: 'system', content: `现在的时间:${getCurrentTime()}` })
+  
   let sentence = "";
   // 建立一个句子缓冲区
   let sentence_buffer = [];
@@ -299,3 +294,31 @@ const port = process.env.PORT||9000;
 app.listen(port, () => {
   console.log(`Server start on http://localhost:${port}`);
 })
+
+function getCurrentTime() {
+  let now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;  // getMonth() 返回的是 0-11，所以需要加 1
+  let date = now.getDate();
+  let hours = now.getHours();
+  let minutes = now.getMinutes();
+  let seconds = now.getSeconds();
+
+  // 格式化日期和时间
+  month = month < 10 ? '0' + month : month;
+  date = date < 10 ? '0' + date : date;
+  hours = hours < 10 ? '0' + hours : hours;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
+
+  return year + '-' + month + '-' + date + ' ' + hours + ':' + minutes + ':' + seconds;
+}
+
+function getDayOfWeek() {
+  let now = new Date();
+  let dayOfWeek = now.getDay();
+
+  let days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+  return days[dayOfWeek];
+}
