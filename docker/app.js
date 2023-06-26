@@ -30,7 +30,6 @@ const mdClient = process.env.TENCENT_CLOUD_SID && process.env.TENCENT_CLOUD_SKEY
 const controller = new AbortController();
 
 app.all(`*`, async (req, res) => {
-  
   if(req.originalUrl) req.url = req.originalUrl;
   let url = `https://api.openai.com${req.url}`;
   // 从 header 中取得 Authorization': 'Bearer 后的 token
@@ -47,6 +46,10 @@ app.all(`*`, async (req, res) => {
 
   // console.log( req );
   const { moderation, moderation_level, ...restBody } = req.body;
+  restBody.messages.unshift({ role: 'system', content: `现在${getDayOfWeek()}` })
+  restBody.messages.unshift({ role: 'system', content: `现在的时间:${getCurrentTime()}` })
+  console.log('==>',restBody);
+  
   let sentence = "";
   // 建立一个句子缓冲区
   let sentence_buffer = [];
@@ -180,7 +183,6 @@ app.all(`*`, async (req, res) => {
   // console.log({url, options});
 
   try {
-    
     // 如果是 chat completion 和 text completion，使用 SSE
     if( (req.url.startsWith('/v1/completions') || req.url.startsWith('/v1/chat/completions')) && req.body.stream ) {
       console.log("使用 SSE");
@@ -292,3 +294,31 @@ const port = process.env.PORT||9000;
 app.listen(port, () => {
   console.log(`Server start on http://localhost:${port}`);
 })
+
+function getCurrentTime() {
+  let now = new Date();
+  let year = now.getFullYear();
+  let month = now.getMonth() + 1;  // getMonth() 返回的是 0-11，所以需要加 1
+  let date = now.getDate();
+  let hours = now.getHours();
+  let minutes = now.getMinutes();
+  let seconds = now.getSeconds();
+
+  // 格式化日期和时间
+  month = month < 10 ? '0' + month : month;
+  date = date < 10 ? '0' + date : date;
+  hours = hours < 10 ? '0' + hours : hours;
+  minutes = minutes < 10 ? '0' + minutes : minutes;
+  seconds = seconds < 10 ? '0' + seconds : seconds;
+
+  return year + '-' + month + '-' + date + ' ' + hours + ':' + minutes + ':' + seconds;
+}
+
+function getDayOfWeek() {
+  let now = new Date();
+  let dayOfWeek = now.getDay();
+
+  let days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+  return days[dayOfWeek];
+}
