@@ -6,6 +6,7 @@ var forms = multer({limits: { fieldSize: 10*1024*1024 }});
 app.use(forms.array()); 
 const cors = require('cors');
 app.use(cors());
+const HOST = '0.0.0.0';  // 更改为你想要的 IP 地址
 
 const bodyParser = require('body-parser')
 app.use(bodyParser.json({limit : '50mb' }));  
@@ -291,8 +292,8 @@ app.use(function(err, req, res, next) {
 })
 
 const port = process.env.PORT||9000;
-app.listen(port, () => {
-  console.log(`Server start on http://localhost:${port}`);
+app.listen(port,HOST, () => {
+  console.log(`Server start on http://0.0.0.0:${port}`);
 })
 
 function getCurrentTime() {
